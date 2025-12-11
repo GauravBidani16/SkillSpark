@@ -183,7 +183,7 @@ class CourseDetailView: UIView {
         
         func setupForumButton() {
             forumButton = UIButton(type: .system)
-            forumButton.setTitle("💬 Join Discussion Forum", for: .normal)
+            forumButton.setTitle("Join Discussion Forum", for: .normal)
             forumButton.backgroundColor = .white
             forumButton.setTitleColor(UIColor(red: 102/255, green: 126/255, blue: 234/255, alpha: 1.0), for: .normal)
             forumButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 16)

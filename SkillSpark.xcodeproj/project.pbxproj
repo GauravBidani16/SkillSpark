@@ -6,6 +6,16 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2542F6952EE758000066A8D4 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F6942EE758000066A8D4 /* FirebaseAuth */; };
+		2542F6972EE758000066A8D4 /* FirebaseAuthCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F6962EE758000066A8D4 /* FirebaseAuthCombine-Community */; };
+		2542F6992EE758000066A8D4 /* FirebaseCore in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F6982EE758000066A8D4 /* FirebaseCore */; };
+		2542F69B2EE758000066A8D4 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F69A2EE758000066A8D4 /* FirebaseFirestore */; };
+		2542F69D2EE758000066A8D4 /* FirebaseFirestoreCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F69C2EE758000066A8D4 /* FirebaseFirestoreCombine-Community */; };
+		2542F69F2EE758000066A8D4 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F69E2EE758000066A8D4 /* FirebaseStorage */; };
+		2542F6A12EE758000066A8D4 /* FirebaseStorageCombine-Community in Frameworks */ = {isa = PBXBuildFile; productRef = 2542F6A02EE758000066A8D4 /* FirebaseStorageCombine-Community */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		252B2C3D2ECBB2ED00210EBA /* SkillSpark.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SkillSpark.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -36,6 +46,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2542F6952EE758000066A8D4 /* FirebaseAuth in Frameworks */,
+				2542F6A12EE758000066A8D4 /* FirebaseStorageCombine-Community in Frameworks */,
+				2542F69B2EE758000066A8D4 /* FirebaseFirestore in Frameworks */,
+				2542F6992EE758000066A8D4 /* FirebaseCore in Frameworks */,
+				2542F69D2EE758000066A8D4 /* FirebaseFirestoreCombine-Community in Frameworks */,
+				2542F6972EE758000066A8D4 /* FirebaseAuthCombine-Community in Frameworks */,
+				2542F69F2EE758000066A8D4 /* FirebaseStorage in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +95,13 @@
 			);
 			name = SkillSpark;
 			packageProductDependencies = (
+				2542F6942EE758000066A8D4 /* FirebaseAuth */,
+				2542F6962EE758000066A8D4 /* FirebaseAuthCombine-Community */,
+				2542F6982EE758000066A8D4 /* FirebaseCore */,
+				2542F69A2EE758000066A8D4 /* FirebaseFirestore */,
+				2542F69C2EE758000066A8D4 /* FirebaseFirestoreCombine-Community */,
+				2542F69E2EE758000066A8D4 /* FirebaseStorage */,
+				2542F6A02EE758000066A8D4 /* FirebaseStorageCombine-Community */,
 			);
 			productName = SkillSpark;
 			productReference = 252B2C3D2ECBB2ED00210EBA /* SkillSpark.app */;
@@ -107,6 +131,9 @@
 			);
 			mainGroup = 252B2C342ECBB2ED00210EBA;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 252B2C3E2ECBB2ED00210EBA /* Products */;
 			projectDirPath = "";
@@ -148,6 +175,8 @@
 				DEVELOPMENT_TEAM = L3J9M3MR5F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SkillSpark/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "SkillSpark needs camera access to take profile photos and attach images to forum posts.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SkillSpark needs photo library access to select profile photos and attach images to forum posts.\n";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -180,6 +209,8 @@
 				DEVELOPMENT_TEAM = L3J9M3MR5F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SkillSpark/Info.plist;
+				INFOPLIST_KEY_NSCameraUsageDescription = "SkillSpark needs camera access to take profile photos and attach images to forum posts.";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "SkillSpark needs photo library access to select profile photos and attach images to forum posts.\n";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -345,6 +376,55 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.6.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2542F6942EE758000066A8D4 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		2542F6962EE758000066A8D4 /* FirebaseAuthCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseAuthCombine-Community";
+		};
+		2542F6982EE758000066A8D4 /* FirebaseCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCore;
+		};
+		2542F69A2EE758000066A8D4 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		2542F69C2EE758000066A8D4 /* FirebaseFirestoreCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseFirestoreCombine-Community";
+		};
+		2542F69E2EE758000066A8D4 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
+		2542F6A02EE758000066A8D4 /* FirebaseStorageCombine-Community */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2542F6932EE758000066A8D4 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseStorageCombine-Community";
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 252B2C352ECBB2ED00210EBA /* Project object */;
 }

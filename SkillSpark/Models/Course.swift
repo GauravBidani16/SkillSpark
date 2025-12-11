@@ -6,10 +6,9 @@
 //
 
 import Foundation
-import UIKit
 
-struct Course {
-    var id: String
+struct Course: Codable {
+    var id: String = ""
     var title: String
     var description: String
     var instructor: String
@@ -18,36 +17,22 @@ struct Course {
     var rating: Double
     var studentCount: Int
     var duration: String
-    var image: UIImage?
+    var imageURL: String?
     var hasForum: Bool
-    var lessons: [Lesson]
     
-    init(id: String, title: String, description: String, instructor: String, isFree: Bool, price: Double? = nil, rating: Double, studentCount: Int, duration: String, image: UIImage? = nil, hasForum: Bool = false, lessons: [Lesson] = []) {
-        self.id = id
-        self.title = title
-        self.description = description
-        self.instructor = instructor
-        self.isFree = isFree
-        self.price = price
-        self.rating = rating
-        self.studentCount = studentCount
-        self.duration = duration
-        self.image = image
-        self.hasForum = hasForum
-        self.lessons = lessons
+    enum CodingKeys: String, CodingKey {
+        case title, description, instructor, isFree, price
+        case rating, studentCount, duration, imageURL, hasForum
     }
 }
 
-struct Lesson {
-    var id: String
+struct Lesson: Codable {
+    var id: String = ""
     var title: String
     var duration: String
-    var isCompleted: Bool
+    var order: Int
     
-    init(id: String, title: String, duration: String, isCompleted: Bool = false) {
-        self.id = id
-        self.title = title
-        self.duration = duration
-        self.isCompleted = isCompleted
+    enum CodingKeys: String, CodingKey {
+        case title, duration, order
     }
 }

@@ -7,20 +7,14 @@
 
 import Foundation
 
-import UIKit
-
-struct User {
-    var id: String
+struct User: Codable {
+    var id: String = ""
     var name: String
     var email: String
-    var profileImage: UIImage?
+    var profileImageURL: String?
     var enrolledCourseIds: [String]
     
-    init(id: String, name: String, email: String, profileImage: UIImage? = nil, enrolledCourseIds: [String] = []) {
-        self.id = id
-        self.name = name
-        self.email = email
-        self.profileImage = profileImage
-        self.enrolledCourseIds = enrolledCourseIds
+    enum CodingKeys: String, CodingKey {
+        case name, email, profileImageURL, enrolledCourseIds
     }
 }

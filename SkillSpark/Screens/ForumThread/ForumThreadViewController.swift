@@ -6,77 +6,216 @@
 //
 
 import UIKit
+import FirebaseFirestore
 
 class ForumThreadViewController: UIViewController {
 
     let forumThreadView = ForumThreadView()
+    
+    // MARK: - Data
+    var thread: ForumThread?
+    var replies: [ForumReply] = []
+    var listener: ListenerRegistration?
+    
+    var imagePickerManager: ImagePickerManager?
+    var selectedImage: UIImage?
+    var previewImageView: UIImageView?
+    
+    override func loadView() {
+        view = forumThreadView
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        title = "Discussion"
         
-        let replies = [
-            ("Sarah M", "1 hour ago", "You need to make sure you're setting `translatesAutoresizingMaskIntoConstraints = false` on your label. That's likely why it's not respecting your constraints!", false),
-            ("Mike Chen", "45 min ago", "Also, here's how I usually center views. This works perfectly for me.", true),
-            ("John Doe", "30 min ago", "Thank you both! That fixed it. I was missing the translatesAutoresizing... line. ", false),
-        ]
+        forumThreadView.tableViewReplies.delegate = self
+        forumThreadView.tableViewReplies.dataSource = self
         
-        override func loadView() {
-            view = forumThreadView
-        }
+        forumThreadView.cameraButton.addTarget(self, action: #selector(onCameraButtonTapped), for: .touchUpInside)
+        forumThreadView.sendButton.addTarget(self, action: #selector(onSendButtonTapped), for: .touchUpInside)
         
-        override func viewDidLoad() {
-            super.viewDidLoad()
-            title = "Discussion"
-            
-            setupOriginalPost()
-            
-            forumThreadView.tableViewReplies.delegate = self
-            forumThreadView.tableViewReplies.dataSource = self
-            
-            forumThreadView.cameraButton.addTarget(self, action: #selector(onCameraButtonTapped), for: .touchUpInside)
-            forumThreadView.sendButton.addTarget(self, action: #selector(onSendButtonTapped), for: .touchUpInside)
-        }
+        let footerView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 20))
+        footerView.backgroundColor = .clear
+        forumThreadView.tableViewReplies.tableFooterView = footerView
         
-        func setupOriginalPost() {
-            forumThreadView.opUserImageView.image = UIImage(systemName: "person.circle.fill")
-            forumThreadView.opUserNameLabel.text = "John Doe"
-            forumThreadView.opTimestampLabel.text = "2 hours ago"
-            forumThreadView.opTitleLabel.text = "Having trouble with Auto Layout constraints"
-            forumThreadView.opContentLabel.text = "I'm trying to center a UILabel in my view controller, but the constraints don't seem to work as expected. The label appears in the top-left corner instead of the center. Can someone explain what I might be doing wrong?"
-            
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+        
+        setupOriginalPost()
+        startListeningToReplies()
+    }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        listener?.remove()
+    }
+    
+    func setupOriginalPost() {
+        guard let thread = thread else { return }
+        
+        forumThreadView.opUserImageView.image = UIImage(systemName: "person.circle.fill")
+        forumThreadView.opUserNameLabel.text = thread.userName
+        forumThreadView.opTimestampLabel.text = formatTimestamp(thread.timestamp)
+        forumThreadView.opTitleLabel.text = thread.title
+        forumThreadView.opContentLabel.text = thread.content
+        
+        if let imageURL = thread.imageURL, !imageURL.isEmpty {
             forumThreadView.opAttachedImageView.isHidden = false
-            forumThreadView.opAttachedImageView.backgroundColor = UIColor.systemGray4
+        } else {
+            forumThreadView.opAttachedImageView.isHidden = true
+        }
+    }
+    
+    func startListeningToReplies() {
+        guard let threadId = thread?.id else { return }
+        
+        listener = FirebaseManager.shared.listenToForumReplies(threadId: threadId) { [weak self] result in
+            guard let self = self else { return }
             
-            forumThreadView.opContentLabel.bottomAnchor.constraint(equalTo: forumThreadView.opAttachedImageView.topAnchor, constant: -12).isActive = false
+            switch result {
+            case .success(let replies):
+                print("✅ Got \(replies.count) replies (real-time)")
+                self.replies = replies
+                self.forumThreadView.tableViewReplies.reloadData()
+                self.updateTableViewHeight()
+                
+            case .failure(let error):
+                print("❌ Error listening to replies: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func updateTableViewHeight() {
+        // Force layout to get accurate content size
+        forumThreadView.tableViewReplies.layoutIfNeeded()
+        
+        // Calculate total height needed
+        var totalHeight: CGFloat = 0
+        for i in 0..<replies.count {
+            let reply = replies[i]
+            if let imageURL = reply.imageURL, !imageURL.isEmpty {
+                totalHeight += 250  // Height with image
+            } else {
+                totalHeight += 100  // Height without image
+            }
+        }
+        totalHeight += 20
+        
+        // Update constraint
+        forumThreadView.tableViewReplies.constraints.forEach { constraint in
+            if constraint.firstAttribute == .height {
+                constraint.constant = max(totalHeight, 100)
+            }
         }
         
-        @objc func onCameraButtonTapped() {
-            let alert = UIAlertController(
-                title: "Attach Image",
-                message: "Camera feature will allow you to attach screenshots or photos to your reply",
-                preferredStyle: .actionSheet
-            )
-            alert.addAction(UIAlertAction(title: "Take Photo", style: .default))
-            alert.addAction(UIAlertAction(title: "Choose from Library", style: .default))
-            alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-            present(alert, animated: true)
-        }
-        
-        @objc func onSendButtonTapped() {
-            guard let replyText = forumThreadView.replyTextField.text, !replyText.isEmpty else {
+        forumThreadView.layoutIfNeeded()
+    }
+    
+    // MARK: - Send Reply
+    @objc func onSendButtonTapped() {
+        guard let replyText = forumThreadView.replyTextField.text, !replyText.isEmpty else {
+            // If no text but has image, still allow
+            if selectedImage == nil {
                 return
             }
+            return
+        }
+        
+        guard let threadId = thread?.id else { return }
+        
+        // Disable button while sending
+        forumThreadView.sendButton.isEnabled = false
+        
+        if let image = selectedImage {
+            // Upload image first, then post reply
+            FirebaseManager.shared.uploadForumImage(image: image) { [weak self] result in
+                guard let self = self else { return }
+                
+                switch result {
+                case .success(let imageURL):
+                    self.postReply(threadId: threadId, content: replyText, imageURL: imageURL)
+                    
+                case .failure(let error):
+                    print("❌ Error uploading image: \(error.localizedDescription)")
+                    self.forumThreadView.sendButton.isEnabled = true
+                    self.showErrorAlert(message: "Failed to upload image")
+                }
+            }
+        } else {
+            // No image, just post reply
+            postReply(threadId: threadId, content: replyText, imageURL: nil)
+        }
+    }
+
+    func postReply(threadId: String, content: String, imageURL: String?) {
+        FirebaseManager.shared.addForumReply(threadId: threadId, content: content, imageURL: imageURL) { [weak self] result in
+            guard let self = self else { return }
             
-            let alert = UIAlertController(
-                title: "Reply Posted",
-                message: "Your reply has been added to the discussion",
-                preferredStyle: .alert
-            )
-            alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
+            self.forumThreadView.sendButton.isEnabled = true
+            
+            switch result {
+            case .success:
+                print("✅ Reply posted")
                 self.forumThreadView.replyTextField.text = ""
                 self.forumThreadView.replyTextField.resignFirstResponder()
-            })
-            present(alert, animated: true)
+                self.clearSelectedImage()
+                
+            case .failure(let error):
+                print("❌ Error posting reply: \(error.localizedDescription)")
+                self.showErrorAlert(message: error.localizedDescription)
+            }
         }
+    }
+    
+    @objc func onCameraButtonTapped() {
+        imagePickerManager = ImagePickerManager(presentingViewController: self)
+        imagePickerManager?.delegate = self
+        imagePickerManager?.showImagePickerOptions()
+    }
+    
+    func showComingSoonAlert() {
+        let alert = UIAlertController(
+            title: "Coming Soon",
+            message: "Image attachments will be available in Phase 10!",
+            preferredStyle: .alert
+        )
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    func formatTimestamp(_ timestamp: Timestamp) -> String {
+        let date = timestamp.dateValue()
+        let now = Date()
+        let diff = now.timeIntervalSince(date)
+        
+        if diff < 60 {
+            return "Just now"
+        } else if diff < 3600 {
+            let mins = Int(diff / 60)
+            return "\(mins) min ago"
+        } else if diff < 86400 {
+            let hours = Int(diff / 3600)
+            return "\(hours) hour\(hours == 1 ? "" : "s") ago"
+        } else {
+            let days = Int(diff / 86400)
+            return "\(days) day\(days == 1 ? "" : "s") ago"
+        }
+    }
+    
+    func showErrorAlert(message: String) {
+        let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
+    }
 }
 
+// MARK: - TableView DataSource & Delegate
 extension ForumThreadViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -87,23 +226,103 @@ extension ForumThreadViewController: UITableViewDelegate, UITableViewDataSource 
         let cell = tableView.dequeueReusableCell(withIdentifier: "ForumReplyCell", for: indexPath) as! ForumReplyCell
         
         let reply = replies[indexPath.row]
-        cell.userNameLabel.text = reply.0
-        cell.timestampLabel.text = reply.1
-        cell.replyLabel.text = reply.2
+        
+        cell.delegate = self
+        cell.userNameLabel.text = reply.userName
+        cell.timestampLabel.text = formatTimestamp(reply.timestamp)
+        cell.replyLabel.text = reply.content
         cell.userImageView.image = UIImage(systemName: "person.circle.fill")
         
-        // Configure with or without image
-        let hasImage = reply.3
-        cell.configureWithImage(hasImage)
-        
-        if hasImage {
-            cell.attachedImageView.backgroundColor = UIColor.systemGray4
+        // Handle attached image
+        if let imageURL = reply.imageURL, !imageURL.isEmpty {
+            cell.loadImage(from: imageURL)
+        } else {
+            cell.configure(hasImage: false)
         }
         
         return cell
     }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+
+    func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        let reply = replies[indexPath.row]
+        if let imageURL = reply.imageURL, !imageURL.isEmpty {
+            return 250
+        }
+        return 100
+    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - ImagePickerDelegate
+extension ForumThreadViewController: ImagePickerDelegate {
+    
+    func didSelectImage(_ image: UIImage) {
+        selectedImage = image
+        showImagePreview(image)
+    }
+    
+    func didCancelImagePicker() {
+        print("Image picker cancelled")
+    }
+    
+    func showImagePreview(_ image: UIImage) {
+        previewImageView?.removeFromSuperview()
+        
+        previewImageView = UIImageView(image: image)
+        previewImageView?.contentMode = .scaleAspectFill
+        previewImageView?.clipsToBounds = true
+        previewImageView?.layer.cornerRadius = 8
+        previewImageView?.translatesAutoresizingMaskIntoConstraints = false
+        
+        let removeButton = UIButton(type: .close)
+        removeButton.addTarget(self, action: #selector(removeImagePreview), for: .touchUpInside)
+        removeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        guard let preview = previewImageView else { return }
+        
+        forumThreadView.replyInputContainer.addSubview(preview)
+        preview.addSubview(removeButton)
+        
+        NSLayoutConstraint.activate([
+            preview.leadingAnchor.constraint(equalTo: forumThreadView.cameraButton.trailingAnchor, constant: 8),
+            preview.centerYAnchor.constraint(equalTo: forumThreadView.replyInputContainer.centerYAnchor),
+            preview.widthAnchor.constraint(equalToConstant: 40),
+            preview.heightAnchor.constraint(equalToConstant: 40),
+            
+            removeButton.topAnchor.constraint(equalTo: preview.topAnchor, constant: -5),
+            removeButton.trailingAnchor.constraint(equalTo: preview.trailingAnchor, constant: 5),
+            removeButton.widthAnchor.constraint(equalToConstant: 20),
+            removeButton.heightAnchor.constraint(equalToConstant: 20),
+        ])
+        
+        forumThreadView.replyTextField.leadingAnchor.constraint(equalTo: preview.trailingAnchor, constant: 8).isActive = true
+    }
+    
+    @objc func removeImagePreview() {
+        clearSelectedImage()
+    }
+    
+    func clearSelectedImage() {
+        selectedImage = nil
+        previewImageView?.removeFromSuperview()
+        previewImageView = nil
+    }
+}
+
+extension ForumThreadViewController: ForumReplyCellDelegate {
+    func didTapImage(_ image: UIImage?) {
+        guard let image = image else { return }
+        
+        let imageViewer = ImageViewerViewController()
+        imageViewer.image = image
+        imageViewer.modalPresentationStyle = .fullScreen
+        present(imageViewer, animated: true)
     }
 }
