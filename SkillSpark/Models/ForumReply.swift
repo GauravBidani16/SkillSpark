@@ -6,27 +6,18 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-import UIKit
-
-struct ForumReply {
-    var id: String
+struct ForumReply: Codable {
+    var id: String = ""
     var threadId: String
     var userId: String
     var userName: String
-    var userImage: UIImage?
     var content: String
-    var timestamp: Date
-    var image: UIImage?
+    var timestamp: Timestamp
+    var imageURL: String?
     
-    init(id: String, threadId: String, userId: String, userName: String, userImage: UIImage? = nil, content: String, timestamp: Date = Date(), image: UIImage? = nil) {
-        self.id = id
-        self.threadId = threadId
-        self.userId = userId
-        self.userName = userName
-        self.userImage = userImage
-        self.content = content
-        self.timestamp = timestamp
-        self.image = image
+    enum CodingKeys: String, CodingKey {
+        case threadId, userId, userName, content, timestamp, imageURL
     }
 }

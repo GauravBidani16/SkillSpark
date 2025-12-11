@@ -6,21 +6,17 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
-struct Enrollment {
-    var id: String
+struct Enrollment: Codable {
+    var id: String = ""
     var userId: String
     var courseId: String
     var progress: Double
-    var enrolledDate: Date
+    var enrolledDate: Timestamp
     var completedLessonIds: [String]
     
-    init(id: String, userId: String, courseId: String, progress: Double = 0.0, enrolledDate: Date = Date(), completedLessonIds: [String] = []) {
-        self.id = id
-        self.userId = userId
-        self.courseId = courseId
-        self.progress = progress
-        self.enrolledDate = enrolledDate
-        self.completedLessonIds = completedLessonIds
+    enum CodingKeys: String, CodingKey {
+        case userId, courseId, progress, enrolledDate, completedLessonIds
     }
 }

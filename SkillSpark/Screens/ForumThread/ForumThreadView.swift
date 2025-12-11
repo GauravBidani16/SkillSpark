@@ -102,21 +102,23 @@ class ForumThreadView: UIView {
             originalPostContainer.addSubview(opAttachedImageView)
         }
         
-        func setupRepliesSection() {
-            repliesTitleLabel = UILabel()
-            repliesTitleLabel.text = "Replies"
-            repliesTitleLabel.font = UIFont.boldSystemFont(ofSize: 18)
-            repliesTitleLabel.textColor = .black
-            repliesTitleLabel.translatesAutoresizingMaskIntoConstraints = false
-            contentView.addSubview(repliesTitleLabel)
-            
-            tableViewReplies = UITableView()
-            tableViewReplies.register(ForumReplyCell.self, forCellReuseIdentifier: "ForumReplyCell")
-            tableViewReplies.separatorStyle = .none
-            tableViewReplies.isScrollEnabled = false
-            tableViewReplies.translatesAutoresizingMaskIntoConstraints = false
-            contentView.addSubview(tableViewReplies)
-        }
+    func setupRepliesSection() {
+        repliesTitleLabel = UILabel()
+        repliesTitleLabel.text = "Replies"
+        repliesTitleLabel.font = UIFont.boldSystemFont(ofSize: 18)
+        repliesTitleLabel.textColor = .black
+        repliesTitleLabel.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(repliesTitleLabel)
+        
+        tableViewReplies = UITableView()
+        tableViewReplies.register(ForumReplyCell.self, forCellReuseIdentifier: "ForumReplyCell")
+        tableViewReplies.separatorStyle = .none
+        tableViewReplies.isScrollEnabled = false
+        tableViewReplies.rowHeight = UITableView.automaticDimension  // ADD THIS LINE
+        tableViewReplies.estimatedRowHeight = 120  // ADD THIS LINE
+        tableViewReplies.translatesAutoresizingMaskIntoConstraints = false
+        contentView.addSubview(tableViewReplies)
+    }
         
         func setupReplyInput() {
             replyInputContainer = UIView()

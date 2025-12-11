@@ -35,7 +35,6 @@ class HomeView: UIView {
         }
         
         func setupFilterButtons() {
-            // All Button
             allButton = UIButton(type: .system)
             allButton.setTitle("All", for: .normal)
             allButton.backgroundColor = UIColor(red: 102/255, green: 126/255, blue: 234/255, alpha: 1.0)
