@@ -20,11 +20,9 @@ class RegisterViewController: UIViewController {
         
         navigationController?.setNavigationBarHidden(false, animated: true)
         
-        // Setup button actions
         registerView.registerButton.addTarget(self, action: #selector(onRegisterButtonTapped), for: .touchUpInside)
         registerView.loginButton.addTarget(self, action: #selector(onLoginButtonTapped), for: .touchUpInside)
         
-        // Dismiss keyboard on tap
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         view.addGestureRecognizer(tapGesture)
     }
@@ -78,11 +76,9 @@ class RegisterViewController: UIViewController {
             
             switch result {
             case .success(let user):
-                print("✅ Registered user: \(user.name)")
                 self.navigateToMainApp()
                 
             case .failure(let error):
-                print("❌ Registration error: \(error.localizedDescription)")
                 self.registerView.showError(error.localizedDescription)
             }
         }

@@ -12,7 +12,6 @@ class ForumViewController: UIViewController {
 
     let forumView = ForumView()
     
-    // MARK: - Data
     var courseId: String = ""
     var courseTitle: String = ""
     var threads: [ForumThread] = []
@@ -20,8 +19,7 @@ class ForumViewController: UIViewController {
     var listener: ListenerRegistration?
     var showAllThreads: Bool = false
     
-    // For grouped view
-    var courseNames: [String: String] = [:]  // courseId -> courseName
+    var courseNames: [String: String] = [:]
     var groupedThreads: [(courseName: String, courseId: String, threads: [ForumThread])] = []
     var isSearching: Bool = false
     
@@ -65,7 +63,6 @@ class ForumViewController: UIViewController {
         listener?.remove()
     }
     
-    // MARK: - Fetch All Threads from Enrolled Courses
     func fetchAllEnrolledCoursesThreads() {
         FirebaseManager.shared.fetchEnrollments { [weak self] result in
             guard let self = self else { return }
@@ -86,7 +83,6 @@ class ForumViewController: UIViewController {
                 }
                 
             case .failure(let error):
-                print("❌ Error fetching enrollments: \(error.localizedDescription)")
             }
         }
     }
@@ -119,7 +115,6 @@ class ForumViewController: UIViewController {
                 guard let self = self else { return }
                 
                 if let error = error {
-                    print("❌ Error fetching threads: \(error.localizedDescription)")
                     return
                 }
                 
@@ -142,7 +137,6 @@ class ForumViewController: UIViewController {
                     }
                 }
                 
-                print("✅ Got \(threads.count) threads from enrolled courses")
                 self.threads = threads
                 self.filteredThreads = threads
                 self.groupThreadsByCourse()
@@ -150,7 +144,6 @@ class ForumViewController: UIViewController {
             }
     }
     
-    // MARK: - Group Threads by Course
     func groupThreadsByCourse() {
         var grouped: [String: [ForumThread]] = [:]
         
@@ -162,17 +155,14 @@ class ForumViewController: UIViewController {
             }
         }
         
-        // Convert to array of tuples sorted by course name
         groupedThreads = grouped.map { (courseId, threads) in
             let courseName = courseNames[courseId] ?? "Unknown Course"
             return (courseName: courseName, courseId: courseId, threads: threads)
         }.sorted { $0.courseName < $1.courseName }
     }
     
-    // MARK: - Real-Time Listener (for specific course)
     func startListeningToThreads() {
         guard !courseId.isEmpty else {
-            print("❌ No courseId provided")
             return
         }
         
@@ -181,18 +171,15 @@ class ForumViewController: UIViewController {
             
             switch result {
             case .success(let threads):
-                print("✅ Got \(threads.count) threads (real-time)")
                 self.threads = threads
                 self.filteredThreads = threads
                 self.updateUI()
                 
             case .failure(let error):
-                print("❌ Error listening to threads: \(error.localizedDescription)")
             }
         }
     }
     
-    // MARK: - Update UI
     func updateUI() {
         let hasThreads: Bool
         if showAllThreads && !isSearching {
@@ -206,7 +193,6 @@ class ForumViewController: UIViewController {
         forumView.tableViewThreads.reloadData()
     }
     
-    // MARK: - New Thread
     @objc func onNewThreadButtonTapped() {
         let alert = UIAlertController(
             title: "New Discussion",
@@ -240,18 +226,15 @@ class ForumViewController: UIViewController {
         FirebaseManager.shared.createForumThread(courseId: courseId, title: title, content: content) { [weak self] result in
             switch result {
             case .success(let threadId):
-                print("✅ Thread created: \(threadId)")
                 self?.listener?.remove()
                 self?.startListeningToThreads()
                 
             case .failure(let error):
-                print("❌ Error creating thread: \(error.localizedDescription)")
                 self?.showErrorAlert(message: error.localizedDescription)
             }
         }
     }
     
-    // MARK: - Helper
     func formatTimestamp(_ timestamp: Timestamp) -> String {
         let date = timestamp.dateValue()
         let now = Date()
@@ -278,10 +261,8 @@ class ForumViewController: UIViewController {
     }
 }
 
-// MARK: - TableView DataSource & Delegate
 extension ForumViewController: UITableViewDelegate, UITableViewDataSource {
     
-    // Number of sections
     func numberOfSections(in tableView: UITableView) -> Int {
         if showAllThreads && !isSearching {
             return groupedThreads.count
@@ -289,7 +270,6 @@ extension ForumViewController: UITableViewDelegate, UITableViewDataSource {
         return 1
     }
     
-    // Section header
     func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
         if showAllThreads && !isSearching {
             let group = groupedThreads[section]
@@ -298,7 +278,6 @@ extension ForumViewController: UITableViewDelegate, UITableViewDataSource {
         return nil
     }
     
-    // Header height
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if showAllThreads && !isSearching {
             return 44
@@ -306,7 +285,6 @@ extension ForumViewController: UITableViewDelegate, UITableViewDataSource {
         return 0
     }
     
-    // Custom header view
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         if showAllThreads && !isSearching {
             let headerView = UIView()
@@ -386,7 +364,6 @@ extension ForumViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - SearchBar Delegate
 extension ForumViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

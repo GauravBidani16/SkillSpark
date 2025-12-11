@@ -11,7 +11,6 @@ class CoursePlayerViewController: UIViewController {
     
     let coursePlayerView = CoursePlayerView()
     
-    // MARK: - Data
     var course: Course?
     var enrollment: Enrollment?
     var lessons: [Lesson] = []
@@ -33,14 +32,12 @@ class CoursePlayerViewController: UIViewController {
         fetchLessons()
     }
     
-    // MARK: - Setup Course Header
     func setupCourseHeader() {
         guard let course = course else { return }
         
         coursePlayerView.courseTitleLabel.text = course.title
         coursePlayerView.instructorLabel.text = "By \(course.instructor)"
         
-        // Set icon based on course title
         if course.title.contains("iOS") {
             coursePlayerView.courseImageView.image = UIImage(systemName: "swift")
         } else if course.title.contains("Swift") {
@@ -54,7 +51,6 @@ class CoursePlayerViewController: UIViewController {
         }
     }
     
-    // MARK: - Setup Progress
     func setupProgress() {
         guard let enrollment = enrollment else { return }
         
@@ -77,7 +73,6 @@ class CoursePlayerViewController: UIViewController {
         coursePlayerView.progressBar.progress = Float(progress)
     }
     
-    // MARK: - Fetch Lessons
     func fetchLessons() {
         guard let courseId = course?.id else { return }
         
@@ -97,7 +92,6 @@ class CoursePlayerViewController: UIViewController {
         }
     }
     
-    // MARK: - Toggle Lesson Completion
     func toggleLessonCompletion(lesson: Lesson) {
         guard let enrollment = enrollment else { return }
         
@@ -107,10 +101,8 @@ class CoursePlayerViewController: UIViewController {
             completedLessonIds.insert(lesson.id)
         }
         
-        // Calculate new progress
         let newProgress = lessons.isEmpty ? 0.0 : Double(completedLessonIds.count) / Double(lessons.count)
         
-        // Update Firebase
         FirebaseManager.shared.updateEnrollmentProgress(
             enrollmentId: enrollment.id,
             progress: newProgress,
@@ -120,19 +112,16 @@ class CoursePlayerViewController: UIViewController {
             
             switch result {
             case .success:
-                print("✅ Progress updated to \(Int(newProgress * 100))%")
                 self.enrollment?.progress = newProgress
                 self.enrollment?.completedLessonIds = Array(self.completedLessonIds)
                 self.updateProgressUI()
                 self.coursePlayerView.tableViewLessons.reloadData()
                 
-                // Show completion alert if 100%
                 if newProgress >= 1.0 {
                     self.showCompletionAlert()
                 }
                 
             case .failure(let error):
-                print("❌ Error updating progress: \(error.localizedDescription)")
             }
         }
     }
@@ -148,7 +137,6 @@ class CoursePlayerViewController: UIViewController {
     }
 }
 
-// MARK: - TableView DataSource & Delegate
 extension CoursePlayerViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -212,7 +200,6 @@ extension CoursePlayerViewController: LessonContentDelegate {
             
             switch result {
             case .success:
-                print("✅ Progress updated to \(Int(newProgress * 100))%")
                 self.enrollment?.progress = newProgress
                 self.enrollment?.completedLessonIds = Array(self.completedLessonIds)
                 self.updateProgressUI()
@@ -223,7 +210,6 @@ extension CoursePlayerViewController: LessonContentDelegate {
                 }
                 
             case .failure(let error):
-                print("❌ Error updating progress: \(error.localizedDescription)")
             }
         }
     }

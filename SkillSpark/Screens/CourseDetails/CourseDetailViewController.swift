@@ -11,7 +11,6 @@ class CourseDetailViewController: UIViewController {
 
     let courseDetailView = CourseDetailView()
     
-    // MARK: - Data
     var course: Course?
     var lessons: [Lesson] = []
     var isEnrolled: Bool = false
@@ -45,7 +44,6 @@ class CourseDetailViewController: UIViewController {
         courseDetailView.durationLabel.text = "\(course.duration)"
         courseDetailView.descriptionLabel.text = course.description
         
-        // Set price label
         if course.isFree {
             courseDetailView.priceLabel.text = " FREE "
             courseDetailView.priceLabel.backgroundColor = .systemGreen
@@ -54,18 +52,14 @@ class CourseDetailViewController: UIViewController {
             courseDetailView.priceLabel.backgroundColor = UIColor(red: 102/255, green: 126/255, blue: 234/255, alpha: 1.0)
         }
         
-        // Show/hide forum button based on hasForum
         courseDetailView.forumButton.isHidden = !course.hasForum
         
-        // Add learning points (static for now, could be from Firebase)
         addLearningPoints()
     }
     
     func addLearningPoints() {
-        // Clear existing points
         courseDetailView.whatYouLearnStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        // Add placeholder learning points based on course
         guard let course = course else { return }
         
         if course.title.contains("iOS") {
@@ -95,7 +89,6 @@ class CourseDetailViewController: UIViewController {
         }
     }
     
-    // MARK: - Fetch Lessons
     func fetchLessons() {
         guard let courseId = course?.id else { return }
         
@@ -104,21 +97,17 @@ class CourseDetailViewController: UIViewController {
             
             switch result {
             case .success(let lessons):
-                print("✅ Got \(lessons.count) lessons")
                 self.lessons = lessons
                 self.displayLessons()
                 
             case .failure(let error):
-                print("❌ Error fetching lessons: \(error.localizedDescription)")
             }
         }
     }
     
     func displayLessons() {
-        // Clear existing syllabus
         courseDetailView.syllabusStack.arrangedSubviews.forEach { $0.removeFromSuperview() }
         
-        // Add lessons
         for (index, lesson) in lessons.enumerated() {
             courseDetailView.addSyllabusSection(
                 title: "Lesson \(index + 1): \(lesson.title)",
@@ -126,13 +115,11 @@ class CourseDetailViewController: UIViewController {
             )
         }
         
-        // If no lessons, show placeholder
         if lessons.isEmpty {
             courseDetailView.addSyllabusSection(title: "Coming Soon", lessons: "Lessons are being prepared")
         }
     }
     
-    // MARK: - Check Enrollment Status
     func checkEnrollmentStatus() {
         guard let courseId = course?.id else { return }
         
@@ -145,14 +132,11 @@ class CourseDetailViewController: UIViewController {
                     self.isEnrolled = true
                     self.enrollment = enrollment
                     self.updateEnrollButton()
-                    print("✅ User is enrolled in this course")
                 } else {
                     self.isEnrolled = false
-                    print("ℹ️ User is not enrolled in this course")
                 }
                 
             case .failure(let error):
-                print("❌ Error checking enrollment: \(error.localizedDescription)")
             }
         }
     }
@@ -172,13 +156,10 @@ class CourseDetailViewController: UIViewController {
         }
     }
     
-    // MARK: - Button Actions
     @objc func onEnrollButtonTapped() {
         if isEnrolled {
-            // Navigate to Course Player
             navigateToCoursePlayer()
         } else {
-            // Enroll in course
             enrollInCourse()
         }
     }
@@ -186,7 +167,6 @@ class CourseDetailViewController: UIViewController {
     func enrollInCourse() {
         guard let courseId = course?.id else { return }
         
-        // Show loading
         courseDetailView.enrollButton.isEnabled = false
         courseDetailView.enrollButton.setTitle("Enrolling...", for: .normal)
         
@@ -197,13 +177,11 @@ class CourseDetailViewController: UIViewController {
             
             switch result {
             case .success:
-                print("✅ Successfully enrolled!")
                 self.isEnrolled = true
                 self.updateEnrollButton()
                 self.showEnrollmentSuccess()
                 
             case .failure(let error):
-                print("❌ Error enrolling: \(error.localizedDescription)")
                 self.showErrorAlert(message: error.localizedDescription)
                 self.updateEnrollButton()
             }

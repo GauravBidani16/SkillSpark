@@ -11,7 +11,6 @@ class HomeViewController: UIViewController {
 
     let homeView = HomeView()
     
-    // MARK: - Data
     var allCourses: [Course] = []
     var filteredCourses: [Course] = []
     var currentFilter: String = "All"
@@ -36,25 +35,21 @@ class HomeViewController: UIViewController {
         fetchCourses()
     }
     
-    // MARK: - Fetch Courses
     func fetchCourses() {
         FirebaseManager.shared.fetchCourses { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let courses):
-                print("✅ Got \(courses.count) courses")
                 self.allCourses = courses
                 self.applyFilter()
                 
             case .failure(let error):
-                print("❌ Error fetching courses: \(error.localizedDescription)")
                 self.showErrorAlert(message: error.localizedDescription)
             }
         }
     }
     
-    // MARK: - Filter Logic
     func applyFilter() {
         switch currentFilter {
         case "Free":
@@ -91,7 +86,6 @@ class HomeViewController: UIViewController {
         }
     }
     
-    // MARK: - Filter Button Actions
     @objc func onAllButtonTapped() {
         currentFilter = "All"
         updateFilterButtonStyles()
@@ -117,7 +111,6 @@ class HomeViewController: UIViewController {
     }
 }
 
-// MARK: - TableView DataSource & Delegate
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -159,7 +152,6 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
     }
 }
 
-// MARK: - SearchBar Delegate
 extension HomeViewController: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {

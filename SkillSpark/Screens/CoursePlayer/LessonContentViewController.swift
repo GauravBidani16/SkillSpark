@@ -71,12 +71,10 @@ class LessonContentViewController: UIViewController {
             
             switch result {
             case .success(let sections):
-                print("✅ Got \(sections.count) sections")
                 self.sections = sections
                 self.displaySections()
                 
             case .failure(let error):
-                print("❌ Error fetching sections: \(error.localizedDescription)")
                 self.lessonContentView.emptyStateLabel.isHidden = false
             }
         }

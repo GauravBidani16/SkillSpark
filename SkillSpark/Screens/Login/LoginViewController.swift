@@ -56,11 +56,9 @@ class LoginViewController: UIViewController {
             
             switch result {
             case .success(let user):
-                print("✅ Logged in as: \(user.name)")
                 self.navigateToMainApp()
                 
             case .failure(let error):
-                print("❌ Login error: \(error.localizedDescription)")
                 self.loginView.showError(error.localizedDescription)
             }
         }

@@ -12,7 +12,6 @@ class ForumThreadViewController: UIViewController {
 
     let forumThreadView = ForumThreadView()
     
-    // MARK: - Data
     var thread: ForumThread?
     var replies: [ForumReply] = []
     var listener: ListenerRegistration?
@@ -76,34 +75,29 @@ class ForumThreadViewController: UIViewController {
             
             switch result {
             case .success(let replies):
-                print("✅ Got \(replies.count) replies (real-time)")
                 self.replies = replies
                 self.forumThreadView.tableViewReplies.reloadData()
                 self.updateTableViewHeight()
                 
             case .failure(let error):
-                print("❌ Error listening to replies: \(error.localizedDescription)")
             }
         }
     }
     
     func updateTableViewHeight() {
-        // Force layout to get accurate content size
         forumThreadView.tableViewReplies.layoutIfNeeded()
         
-        // Calculate total height needed
         var totalHeight: CGFloat = 0
         for i in 0..<replies.count {
             let reply = replies[i]
             if let imageURL = reply.imageURL, !imageURL.isEmpty {
-                totalHeight += 250  // Height with image
+                totalHeight += 250
             } else {
-                totalHeight += 100  // Height without image
+                totalHeight += 100
             }
         }
         totalHeight += 20
         
-        // Update constraint
         forumThreadView.tableViewReplies.constraints.forEach { constraint in
             if constraint.firstAttribute == .height {
                 constraint.constant = max(totalHeight, 100)
@@ -113,10 +107,8 @@ class ForumThreadViewController: UIViewController {
         forumThreadView.layoutIfNeeded()
     }
     
-    // MARK: - Send Reply
     @objc func onSendButtonTapped() {
         guard let replyText = forumThreadView.replyTextField.text, !replyText.isEmpty else {
-            // If no text but has image, still allow
             if selectedImage == nil {
                 return
             }
@@ -125,11 +117,9 @@ class ForumThreadViewController: UIViewController {
         
         guard let threadId = thread?.id else { return }
         
-        // Disable button while sending
         forumThreadView.sendButton.isEnabled = false
         
         if let image = selectedImage {
-            // Upload image first, then post reply
             FirebaseManager.shared.uploadForumImage(image: image) { [weak self] result in
                 guard let self = self else { return }
                 
@@ -138,13 +128,11 @@ class ForumThreadViewController: UIViewController {
                     self.postReply(threadId: threadId, content: replyText, imageURL: imageURL)
                     
                 case .failure(let error):
-                    print("❌ Error uploading image: \(error.localizedDescription)")
                     self.forumThreadView.sendButton.isEnabled = true
                     self.showErrorAlert(message: "Failed to upload image")
                 }
             }
         } else {
-            // No image, just post reply
             postReply(threadId: threadId, content: replyText, imageURL: nil)
         }
     }
@@ -157,13 +145,11 @@ class ForumThreadViewController: UIViewController {
             
             switch result {
             case .success:
-                print("✅ Reply posted")
                 self.forumThreadView.replyTextField.text = ""
                 self.forumThreadView.replyTextField.resignFirstResponder()
                 self.clearSelectedImage()
                 
             case .failure(let error):
-                print("❌ Error posting reply: \(error.localizedDescription)")
                 self.showErrorAlert(message: error.localizedDescription)
             }
         }
@@ -215,7 +201,6 @@ class ForumThreadViewController: UIViewController {
     }
 }
 
-// MARK: - TableView DataSource & Delegate
 extension ForumThreadViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -233,7 +218,6 @@ extension ForumThreadViewController: UITableViewDelegate, UITableViewDataSource 
         cell.replyLabel.text = reply.content
         cell.userImageView.image = UIImage(systemName: "person.circle.fill")
         
-        // Handle attached image
         if let imageURL = reply.imageURL, !imageURL.isEmpty {
             cell.loadImage(from: imageURL)
         } else {
@@ -260,7 +244,6 @@ extension ForumThreadViewController: UITableViewDelegate, UITableViewDataSource 
     }
 }
 
-// MARK: - ImagePickerDelegate
 extension ForumThreadViewController: ImagePickerDelegate {
     
     func didSelectImage(_ image: UIImage) {

@@ -47,7 +47,6 @@ class ImagePickerManager: NSObject {
         presentingViewController?.present(alert, animated: true)
     }
     
-    // MARK: - Open Camera
     func openCamera() {
         guard UIImagePickerController.isSourceTypeAvailable(.camera) else {
             showAlert(message: "Camera is not available on this device")
@@ -62,7 +61,6 @@ class ImagePickerManager: NSObject {
         presentingViewController?.present(cameraPicker, animated: true)
     }
     
-    // MARK: - Open Photo Library
     func openPhotoLibrary() {
         var configuration = PHPickerConfiguration()
         configuration.filter = .images
@@ -74,7 +72,6 @@ class ImagePickerManager: NSObject {
         presentingViewController?.present(picker, animated: true)
     }
     
-    // MARK: - Helper
     func showAlert(message: String) {
         let alert = UIAlertController(title: "Error", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))

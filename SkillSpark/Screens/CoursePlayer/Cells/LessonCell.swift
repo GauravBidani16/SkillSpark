@@ -102,7 +102,6 @@ class LessonCell: UITableViewCell {
         ])
     }
     
-    // MARK: - Configure Cell
     func configure(lessonNumber: Int, title: String, duration: String, isCompleted: Bool) {
         lessonNumberLabel.text = "\(lessonNumber)"
         titleLabel.text = title

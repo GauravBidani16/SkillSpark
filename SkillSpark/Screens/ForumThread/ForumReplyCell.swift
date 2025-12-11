@@ -23,7 +23,6 @@ class ForumReplyCell: UITableViewCell {
     var replyLabel: UILabel!
     var attachedImageView: UIImageView!
     
-    // Dynamic constraints
     var imageHeightConstraint: NSLayoutConstraint!
     var imageTopConstraint: NSLayoutConstraint!
     
@@ -97,7 +96,6 @@ class ForumReplyCell: UITableViewCell {
         attachedImageView.translatesAutoresizingMaskIntoConstraints = false
         containerView.addSubview(attachedImageView)
         
-        // Add tap gesture for full screen view
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(imageTapped))
         attachedImageView.addGestureRecognizer(tapGesture)
     }
@@ -140,7 +138,6 @@ class ForumReplyCell: UITableViewCell {
         ])
     }
     
-    // MARK: - Configure Cell
     func configure(hasImage: Bool) {
         if hasImage {
             imageHeightConstraint.constant = 150

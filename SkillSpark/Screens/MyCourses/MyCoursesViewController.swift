@@ -32,7 +32,6 @@ class MyCoursesViewController: UIViewController {
         fetchEnrollments()
     }
     
-    // MARK: - Fetch Enrollments
     func fetchEnrollments() {
         guard !isLoading else { return }
         isLoading = true
@@ -42,7 +41,6 @@ class MyCoursesViewController: UIViewController {
             
             switch result {
             case .success(let enrollments):
-                print("✅ Got \(enrollments.count) enrollments")
                 self.enrollments = enrollments
                 
                 if enrollments.isEmpty {
@@ -53,14 +51,12 @@ class MyCoursesViewController: UIViewController {
                 }
                 
             case .failure(let error):
-                print("❌ Error fetching enrollments: \(error.localizedDescription)")
                 self.isLoading = false
                 self.showErrorAlert(message: error.localizedDescription)
             }
         }
     }
     
-    // MARK: - Fetch Course Details for Each Enrollment
     func fetchCoursesForEnrollments() {
         let group = DispatchGroup()
         
@@ -78,7 +74,6 @@ class MyCoursesViewController: UIViewController {
                     self.courses[course.id] = course
                     
                 case .failure(let error):
-                    print("❌ Error fetching course \(enrollment.courseId): \(error.localizedDescription)")
                 }
                 
                 group.leave()
@@ -91,7 +86,6 @@ class MyCoursesViewController: UIViewController {
         }
     }
     
-    // MARK: - Update UI
     func updateUI() {
         let hasEnrollments = !enrollments.isEmpty
         
@@ -101,7 +95,6 @@ class MyCoursesViewController: UIViewController {
         myCoursesView.tableViewCourses.reloadData()
     }
     
-    // MARK: - Helper
     func getStatusText(progress: Double) -> String {
         if progress == 0 {
             return "Not started"
@@ -110,7 +103,7 @@ class MyCoursesViewController: UIViewController {
         } else if progress < 1.0 {
             return "In progress"
         } else {
-            return "Completed! 🎉"
+            return "Completed!"
         }
     }
     
@@ -121,7 +114,6 @@ class MyCoursesViewController: UIViewController {
     }
 }
 
-// MARK: - TableView DataSource & Delegate
 extension MyCoursesViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -174,7 +166,6 @@ extension MyCoursesViewController: UITableViewDelegate, UITableViewDataSource {
         navigationController?.pushViewController(coursePlayerVC, animated: true)
     }
     
-    // MARK: - Swipe to Delete (Unenroll)
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Unenroll") { [weak self] (action, view, completion) in
@@ -212,14 +203,12 @@ extension MyCoursesViewController: UITableViewDelegate, UITableViewDataSource {
             
             switch result {
             case .success:
-                print("✅ Successfully unenrolled")
                 self.enrollments.remove(at: indexPath.row)
                 self.courses.removeValue(forKey: enrollment.courseId)
                 self.myCoursesView.tableViewCourses.deleteRows(at: [indexPath], with: .fade)
                 self.updateUI()
                 
             case .failure(let error):
-                print("❌ Error unenrolling: \(error.localizedDescription)")
                 self.showErrorAlert(message: "Failed to unenroll: \(error.localizedDescription)")
             }
         }

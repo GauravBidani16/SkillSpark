@@ -17,16 +17,12 @@ class FirebaseManager {
     
     private init() {}
     
-    // MARK: - Firebase References
     private let db = Firestore.firestore()
     private let storage = Storage.storage()
     
-    // MARK: - Current User
     var currentUserId: String = "user1"
     
-    // MARK: - COURSES
     
-    /// Fetch all courses
     func fetchCourses(completion: @escaping (Result<[Course], Error>) -> Void) {
         db.collection("courses").getDocuments { snapshot, error in
             if let error = error {
@@ -55,7 +51,6 @@ class FirebaseManager {
         }
     }
     
-    /// Fetch a single course by ID
     func fetchCourse(courseId: String, completion: @escaping (Result<Course, Error>) -> Void) {
         db.collection("courses").document(courseId).getDocument { snapshot, error in
             if let error = error {
@@ -78,7 +73,6 @@ class FirebaseManager {
         }
     }
     
-    /// Fetch lessons for a course
     func fetchLessons(courseId: String, completion: @escaping (Result<[Lesson], Error>) -> Void) {
         db.collection("courses").document(courseId).collection("lessons")
             .order(by: "order")
@@ -108,9 +102,7 @@ class FirebaseManager {
             }
     }
     
-    // MARK: - USERS
     
-    /// Fetch current user
     func fetchCurrentUser(completion: @escaping (Result<User, Error>) -> Void) {
         db.collection("users").document(currentUserId).getDocument { snapshot, error in
             if let error = error {
@@ -133,7 +125,6 @@ class FirebaseManager {
         }
     }
     
-    /// Update user profile
     func updateUser(user: User, completion: @escaping (Result<Void, Error>) -> Void) {
         do {
             try db.collection("users").document(user.id).setData(from: user) { error in
@@ -148,9 +139,7 @@ class FirebaseManager {
         }
     }
     
-    // MARK: - ENROLLMENTS
     
-    /// Fetch enrollments for current user
     func fetchEnrollments(completion: @escaping (Result<[Enrollment], Error>) -> Void) {
         db.collection("enrollments")
             .whereField("userId", isEqualTo: currentUserId)
@@ -180,9 +169,7 @@ class FirebaseManager {
             }
     }
     
-    /// Enroll in a course
     func enrollInCourse(courseId: String, completion: @escaping (Result<Void, Error>) -> Void) {
-        // Check if already enrolled
         db.collection("enrollments")
             .whereField("userId", isEqualTo: currentUserId)
             .whereField("courseId", isEqualTo: courseId)
@@ -227,7 +214,6 @@ class FirebaseManager {
             }
     }
     
-    /// Update enrollment progress
     func updateEnrollmentProgress(enrollmentId: String, progress: Double, completedLessonIds: [String], completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("enrollments").document(enrollmentId).updateData([
             "progress": progress,
@@ -241,7 +227,6 @@ class FirebaseManager {
         }
     }
     
-    /// Get enrollment for a specific course
     func getEnrollment(courseId: String, completion: @escaping (Result<Enrollment?, Error>) -> Void) {
         db.collection("enrollments")
             .whereField("userId", isEqualTo: currentUserId)
@@ -267,8 +252,7 @@ class FirebaseManager {
             }
     }
     
-    
-    /// Fetch forum threads for a course
+
     func fetchForumThreads(courseId: String, completion: @escaping (Result<[ForumThread], Error>) -> Void) {
         db.collection("forumThreads")
             .whereField("courseId", isEqualTo: courseId)
@@ -299,7 +283,6 @@ class FirebaseManager {
             }
     }
     
-    /// Create a new forum thread
     func createForumThread(courseId: String, title: String, content: String, completion: @escaping (Result<String, Error>) -> Void) {
         fetchCurrentUser { result in
             switch result {
@@ -333,8 +316,6 @@ class FirebaseManager {
         }
     }
     
-    
-    /// Fetch replies for a thread
     func fetchForumReplies(threadId: String, completion: @escaping (Result<[ForumReply], Error>) -> Void) {
         db.collection("forumReplies")
             .whereField("threadId", isEqualTo: threadId)
@@ -365,7 +346,6 @@ class FirebaseManager {
             }
     }
     
-    /// Add a reply to a thread
     func addForumReply(threadId: String, content: String, imageURL: String? = nil, completion: @escaping (Result<Void, Error>) -> Void) {
         fetchCurrentUser { result in
             switch result {
@@ -405,9 +385,6 @@ class FirebaseManager {
         }
     }
     
-    // MARK: - STORAGE (Images)
-    
-    /// Upload image to Firebase Storage
     func uploadImage(image: UIImage, path: String, completion: @escaping (Result<String, Error>) -> Void) {
         // Compress image
         guard let imageData = image.jpegData(compressionQuality: 0.5) else {
@@ -442,7 +419,6 @@ class FirebaseManager {
         }
     }
     
-    /// Upload profile image
     func uploadProfileImage(image: UIImage, userId: String, completion: @escaping (Result<String, Error>) -> Void) {
         let path = "profile_images/\(userId)/\(UUID().uuidString).jpg"
         uploadImage(image: image, path: path) { result in
@@ -463,14 +439,11 @@ class FirebaseManager {
         }
     }
     
-    /// Upload forum reply image
     func uploadForumImage(image: UIImage, completion: @escaping (Result<String, Error>) -> Void) {
         let path = "forum_images/\(UUID().uuidString).jpg"
         uploadImage(image: image, path: path, completion: completion)
     }
     
-    
-    /// Listen to forum threads (real-time updates)
     func listenToForumThreads(courseId: String, completion: @escaping (Result<[ForumThread], Error>) -> Void) -> ListenerRegistration {
         return db.collection("forumThreads")
             .whereField("courseId", isEqualTo: courseId)
@@ -501,7 +474,6 @@ class FirebaseManager {
             }
     }
     
-    /// Listen to forum replies (real-time updates)
     func listenToForumReplies(threadId: String, completion: @escaping (Result<[ForumReply], Error>) -> Void) -> ListenerRegistration {
         return db.collection("forumReplies")
             .whereField("threadId", isEqualTo: threadId)
@@ -532,7 +504,6 @@ class FirebaseManager {
             }
     }
     
-    /// Unenroll from a course
     func unenrollFromCourse(enrollmentId: String, courseId: String, completion: @escaping (Result<Void, Error>) -> Void) {
         db.collection("enrollments").document(enrollmentId).delete { error in
             if let error = error {
@@ -540,7 +511,6 @@ class FirebaseManager {
                 return
             }
             
-            // Remove courseId from user's enrolledCourseIds array
             self.db.collection("users").document(self.currentUserId).updateData([
                 "enrolledCourseIds": FieldValue.arrayRemove([courseId])
             ]) { error in
@@ -579,7 +549,6 @@ class FirebaseManager {
                         return
                     }
                     
-                    // Update currentUserId
                     self.currentUserId = firebaseUser.uid
                     completion(.success(newUser))
                 }
@@ -589,7 +558,6 @@ class FirebaseManager {
         }
     }
 
-    /// Login existing user
     func loginUser(email: String, password: String, completion: @escaping (Result<User, Error>) -> Void) {
         Auth.auth().signIn(withEmail: email, password: password) { authResult, error in
             if let error = error {
@@ -608,7 +576,6 @@ class FirebaseManager {
         }
     }
 
-    /// Sign out current user
     func signOut(completion: @escaping (Result<Void, Error>) -> Void) {
         do {
             try Auth.auth().signOut()
@@ -619,7 +586,6 @@ class FirebaseManager {
         }
     }
 
-    /// Check if user is logged in
     func isUserLoggedIn() -> Bool {
         if let user = Auth.auth().currentUser {
             currentUserId = user.uid
@@ -628,14 +594,11 @@ class FirebaseManager {
         return false
     }
 
-    /// Get current Firebase Auth user ID
     func getCurrentAuthUserId() -> String? {
         return Auth.auth().currentUser?.uid
     }
     
-    // MARK: - LESSON SECTIONS
 
-    /// Fetch sections for a lesson
     func fetchLessonSections(courseId: String, lessonId: String, completion: @escaping (Result<[LessonSection], Error>) -> Void) {
         db.collection("courses").document(courseId)
             .collection("lessons").document(lessonId)

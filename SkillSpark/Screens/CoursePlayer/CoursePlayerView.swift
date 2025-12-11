@@ -115,13 +115,11 @@ class CoursePlayerView: UIView {
     
     func initConstraints() {
         NSLayoutConstraint.activate([
-            // Header starts from top of view (not safe area) to cover the notch area with color
             headerView.topAnchor.constraint(equalTo: self.topAnchor),
             headerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
             headerView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             headerView.heightAnchor.constraint(equalToConstant: 180),
             
-            // Content inside header - pushed lower
             courseImageView.leadingAnchor.constraint(equalTo: headerView.leadingAnchor, constant: 20),
             courseImageView.bottomAnchor.constraint(equalTo: headerView.bottomAnchor, constant: -25),
             courseImageView.widthAnchor.constraint(equalToConstant: 50),

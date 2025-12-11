@@ -46,12 +46,10 @@ class ProfileViewController: UIViewController {
             
             switch result {
             case .success(let user):
-                print("✅ Got user: \(user.name)")
                 self.currentUser = user
                 self.updateProfileUI()
                 
             case .failure(let error):
-                print("❌ Error fetching user: \(error.localizedDescription)")
             }
         }
     }
@@ -66,7 +64,6 @@ class ProfileViewController: UIViewController {
                 self.updateStatsUI()
                 
             case .failure(let error):
-                print("❌ Error fetching enrollments: \(error.localizedDescription)")
             }
         }
         
@@ -177,12 +174,10 @@ class ProfileViewController: UIViewController {
         FirebaseManager.shared.updateUser(user: user) { [weak self] result in
             switch result {
             case .success:
-                print("✅ Name updated to: \(newName)")
                 self?.currentUser?.name = newName
                 self?.updateProfileUI()
                 
             case .failure(let error):
-                print("❌ Error updating name: \(error.localizedDescription)")
                 self?.showErrorAlert(message: error.localizedDescription)
             }
         }
@@ -217,7 +212,6 @@ class ProfileViewController: UIViewController {
         
         alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
         alert.addAction(UIAlertAction(title: "Sign Out", style: .destructive) { _ in
-            // Will implement proper sign out in Phase 9 (Authentication)
             self.showSignOutConfirmation()
         })
         
@@ -228,11 +222,9 @@ class ProfileViewController: UIViewController {
         FirebaseManager.shared.signOut { [weak self] result in
             switch result {
             case .success:
-                print("✅ Signed out successfully")
                 self?.navigateToLogin()
                 
             case .failure(let error):
-                print("❌ Sign out error: \(error.localizedDescription)")
                 self?.showErrorAlert(message: error.localizedDescription)
             }
         }
@@ -268,7 +260,6 @@ class ProfileViewController: UIViewController {
     }
 }
 
-// MARK: - ImagePickerDelegate
 extension ProfileViewController: ImagePickerDelegate {
     
     func didSelectImage(_ image: UIImage) {
@@ -283,13 +274,11 @@ extension ProfileViewController: ImagePickerDelegate {
             
             switch result {
             case .success(let imageURL):
-                print("✅ Profile image uploaded: \(imageURL)")
                 self.profileView.profileImageView.image = image
                 self.currentUser?.profileImageURL = imageURL
                 self.showSuccessAlert(message: "Profile photo updated!")
                 
             case .failure(let error):
-                print("❌ Error uploading image: \(error.localizedDescription)")
                 self.showErrorAlert(message: "Failed to upload image: \(error.localizedDescription)")
             }
         }
